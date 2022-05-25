@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'controller.dart';
 
 
 void main() {
@@ -33,7 +34,9 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends ConsumerWidget {
 
-  final _provider = Provider.autoDispose<List<TextEditingController>>((ref) => []);
+  final _controllerListProvider = StateNotifierProvider<ControllerList2,
+      List<AutoDisposeProvider<TextEditingController>>>(
+          (ref) => ControllerList());
 
   MyHomePage({Key? key}) : super(key: key);
 
@@ -42,27 +45,29 @@ class MyHomePage extends ConsumerWidget {
     final button = Center(
       child: IconButton(
         onPressed: (){
-          ref.read(_provider).add(TextEditingController());
+          final list = ref.read(_controllerListProvider.notifier);
+          list.add();
         }, icon: const Icon(Icons.add),
       ),
     );
-    
+
+    final list = ref.watch(_controllerListProvider);
     final listView = ListView.builder(
-      itemCount: ref.watch(_provider).length,
+      itemCount: list.length,
         itemBuilder: (context , index){
+       
         return ListTile(
           leading: IconButton(
             onPressed: (){
-              final list = ref.read(_provider);
-              list.remove(list[index]);
+             ref.read(_controllerListProvider.notifier).remove(index);
             },
             icon: const Icon(Icons.remove_from_queue),
           ),
           title: TextField(
-            controller: ref.watch(_provider)[index],
+            controller: ref.watch(list[index]),
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
-              labelText: "name ${ref.watch(_provider).length + 1}",
+              labelText: "name $index / ${list.length}",
             ),
           ),
         );
